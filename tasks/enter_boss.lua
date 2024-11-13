@@ -1,7 +1,7 @@
 local utils      = require "core.utils"
 local enums      = require "data.enums"
 local tracker    = require "core.tracker"
-local explorer   = require "core.explorer"
+local explorerlite = require "core.explorerlite"
 local settings   = require "core.settings"
 
 
@@ -15,9 +15,9 @@ local task = {
     end,
     Execute = function()
       --  console.print("Executing the task: Enter Boss Dungeon.")
-        explorer.is_task_running = true  -- Set the flag
+        explorerlite.is_task_running = true  -- Set the flag
       --  console.print("Setting explorer task running flag to true.")
-        explorer:clear_path_and_target()
+        explorerlite:clear_path_and_target()
       --  console.print("Clearing path and target in explorer.")
 
         tracker.start_time = 0  -- Reset the start time for the next execution
@@ -31,7 +31,7 @@ local task = {
             loot_manager.interact_with_object(entrance)
         end
 
-        explorer.is_task_running = false  -- Reset the flag
+        explorerlite.is_task_running = false  -- Reset the flag
      --   console.print("Setting explorer task running flag to false.")
     end
 }

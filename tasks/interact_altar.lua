@@ -4,6 +4,14 @@ local enums      = require "data.enums"
 local tracker    = require "core.tracker"
 local explorer   = require "core.explorer"
 local settings   = require "core.settings"
+local explorerlite = require "core.explorerlite"
+
+-- Variables for stuck detection
+local last_position = nil
+local last_move_time = 0
+local stuck_threshold = 2  -- Seconds before considering player stuck
+local last_unstuck_attempt_time = 0
+local unstuck_cooldown = 3  -- Seconds between unstuck attempts
 
 -- Function to find and return the altar actor
 local function interact_with_altar()
@@ -16,6 +24,26 @@ local function interact_with_altar()
         end
     end
     return nil
+end
+
+local function check_if_stuck()
+    local current_pos = get_player_position()
+    local current_time = os.time()
+
+    if last_position and utils.distance_to(last_position) < 0.1 then
+        if current_time - last_move_time > stuck_threshold then
+            -- Check cooldown
+            if current_time - last_unstuck_attempt_time >= unstuck_cooldown then
+                last_unstuck_attempt_time = current_time
+                return true
+            end
+        end
+    else
+        last_move_time = current_time
+    end
+
+    last_position = current_pos
+    return false
 end
 
 -- Variable to track the time when the boss was last summoned
@@ -35,6 +63,24 @@ local task = {
     Execute = function()
         local current_time = get_time_since_inject()
         
+        -- Check if player is stuck
+        if check_if_stuck() then
+            console.print("Player appears to be stuck, finding unstuck target")
+            local unstuck_target = explorerlite.find_unstuck_target()
+            if unstuck_target then
+                console.print("Moving to unstuck target")
+                --explorerlite:clear_path_and_target()
+                explorerlite:set_custom_target(unstuck_target)
+                explorerlite:move_to_target()
+                
+                -- Check if we've reached the unstuck target
+                if utils.distance_to(unstuck_target) < 1 then
+                    console.print("Reached unstuck target")
+                    return
+                end
+            end
+        end
+
         -- Wait for 5 seconds after boss summon before allowing interaction again
         if boss_summon_time > 0 and current_time - boss_summon_time < 1 then
             return
@@ -45,11 +91,15 @@ local task = {
             local actor_position = altar:get_position()
             -- Move towards the altar if not close enough
             if utils.distance_to(actor_position) > 2 then
-                pathfinder.force_move_raw(actor_position)
+                console.print("Moving to altar")
+                --explorerlite:clear_path_and_target()
+                explorerlite:set_custom_target(actor_position)
+                explorerlite:move_to_target()
             end
 
             -- Interact with the altar when close enough
             if utils.distance_to(actor_position) <= 2 then
+                console.print("Interacting with altar")
                 interact_object(altar)
                 utility.summon_boss()
                 settings.altar_activated = true

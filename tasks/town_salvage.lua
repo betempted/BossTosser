@@ -1,6 +1,6 @@
 local utils = require "core.utils"
 local enums = require "data.enums"
-local explorer = require "core.explorer"
+local explorerlite = require "core.explorerlite"
 local settings = require "core.settings"
 local tracker = require "core.tracker"
 local gui = require "gui"
@@ -160,7 +160,7 @@ end,
     
     teleport_to_town = function(self)
         console.print("Teleporting to town")
-        explorer:clear_path_and_target()
+        explorerlite:clear_path_and_target()
         teleport_to_waypoint(enums.waypoints.CERRIGAR)
         self.teleport_start_time = get_time_since_inject()
         console.print("Teleport command issued")
@@ -194,13 +194,13 @@ end,
 
     move_to_blacksmith = function(self)
         console.print("Moving to blacksmith")
-        console.print("Explorer object: " .. tostring(explorer))
-        console.print("set_custom_target exists: " .. tostring(type(explorer.set_custom_target) == "function"))
-        console.print("move_to_target exists: " .. tostring(type(explorer.move_to_target) == "function"))
+        console.print("Explorerlite object: " .. tostring(explorerlite))
+        console.print("set_custom_target exists: " .. tostring(type(explorerlite.set_custom_target) == "function"))
+        console.print("move_to_target exists: " .. tostring(type(explorerlite.move_to_target) == "function"))
         local blacksmith = utils.get_blacksmith()
         if blacksmith then
-            explorer:set_custom_target(blacksmith:get_position())
-            explorer:move_to_target()
+            explorerlite:set_custom_target(blacksmith:get_position())
+            explorerlite:move_to_target()
             if utils.distance_to(blacksmith) < 2 then
                 console.print("Reached blacksmith")
                 self.current_state = salvage_state.INTERACTING_WITH_BLACKSMITH
@@ -208,8 +208,8 @@ end,
         else
             console.print("No blacksmith found, retrying...")
             self.current_retries = self.current_retries + 1
-            explorer:set_custom_target(enums.positions.blacksmith_position)
-            explorer:move_to_target()
+            explorerlite:set_custom_target(enums.positions.blacksmith_position)
+            explorerlite:move_to_target()
         end
     end,
 
@@ -269,8 +269,8 @@ end,
 
     move_to_portal = function(self)
         console.print("Moving to portal")
-        explorer:set_custom_target(enums.positions.portal_position)
-        explorer:move_to_target()
+        explorerlite:set_custom_target(enums.positions.portal_position)
+        explorerlite:move_to_target()
         if utils.distance_to(enums.positions.portal_position) < 5 then
             console.print("Reached portal")
             self.current_state = salvage_state.INTERACTING_WITH_PORTAL

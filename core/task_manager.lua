@@ -45,7 +45,15 @@ function task_manager.get_current_task()
     return current_task
 end
 
-local task_files = { "town_salvage" , "interact_altar", "kill_monsters", "explore_boss", "interact_altar", "enter_boss" }
+local task_files = { 
+    "ground_items_teleport", 
+    "town_salvage", 
+    "interact_altar", 
+    "kill_monsters", 
+    "explore_boss", 
+    "interact_altar", 
+    "enter_boss" 
+}
 for _, file in ipairs(task_files) do
     local task = require("tasks." .. file)
     task_manager.register_task(task)

@@ -20,7 +20,8 @@ local tracker = {
     locked_door_found = false,
     boss_killed = false,
     teleported_from_town = false,
-    start_time = 0
+    start_time = 0,
+    needs_itemreset = false
 }
 
 function tracker.check_time(key, delay)

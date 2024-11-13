@@ -90,7 +90,7 @@ local last_position = nil
 local last_move_time = 0
 local last_explored_targets = {}
 local max_last_targets = 50
-local stuck_check_interval = 60  -- Check every 2 seconds
+local stuck_check_interval = 10  -- Check every 2 seconds
 local stuck_distance_threshold = 0.5  -- Consider stuck if moved less than 0.5 units
 local temp_target_distance = 10  -- Distance for temporary target
 local last_stuck_check_time = 0
@@ -472,10 +472,10 @@ local function reconstruct_path(came_from, current)
         local magnitude2 = math.sqrt(dir2.x^2 + dir2.y^2)
         local angle = math.acos(dot_product / (magnitude1 * magnitude2))
 
-        -- Use the angle from settings, converting degrees to radians
-        local angle_threshold = math.rad(settings.path_angle)
+        -- Use hardcoded angle of 0
+        local angle_threshold = 0
 
-        -- Keep points if the angle is greater than the threshold from settings
+        -- Keep points if the angle is greater than the threshold
         if angle > angle_threshold then
             table.insert(filtered_path, curr)
         end

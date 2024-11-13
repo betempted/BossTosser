@@ -2,7 +2,7 @@ local utils      = require "core.utils"
 local enums      = require "data.enums"
 local settings   = require "core.settings"
 local navigation = require "core.navigation"
-local explorer   = require "core.explorer"
+local explorerlite = require "core.explorerlite"
 local tracker    = require "core.tracker"
 
 local stuck_position = nil
@@ -20,7 +20,7 @@ local task = {
     Execute = function()
         local player_pos = get_player_position()
 
-        if explorer.check_if_stuck() then
+        if explorerlite.check_if_stuck() then
             stuck_position = player_pos
             return false
         end
@@ -42,9 +42,9 @@ local task = {
         if not within_distance then
             local enemy_pos = enemy:get_position()
 
-            explorer:clear_path_and_target()
-            explorer:set_custom_target(enemy_pos)
-            explorer:move_to_target()
+            --explorerlite:clear_path_and_target()
+            explorerlite:set_custom_target(enemy_pos)
+            explorerlite:move_to_target()
         end
     end
 }
