@@ -28,10 +28,15 @@ local task = {
     portal_interact_time = 0,
     
     shouldExecute = function()
+        -- First check if the feature is enabled in settings
+        if not settings.enable_ground_items_teleport then
+            return false
+        end
+
         local in_cerrigar = utils.player_in_zone("Scos_Cerrigar")
         
         -- Execute if too many items on ground and not in town
-        if count_items_on_ground() > 50 and not in_cerrigar then
+        if count_items_on_ground() > 20 and not in_cerrigar then
             tracker.needs_itemreset = true
             return true
         end
@@ -114,9 +119,12 @@ local task = {
                 end
             else
                 console.print("Town portal not found")
-                tracker.needs_itemreset = false
-                self:reset()
-                self.current_state = teleport_state.INIT
+                tracker.needs_itemreset = true
+                if utils.player_in_zone("Scos_Cerrigar") then
+                    self.current_state = teleport_state.INTERACTING_WITH_PORTAL
+                else
+                    self.current_state = teleport_state.INIT
+                end
             end
         end
     end,

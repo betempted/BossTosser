@@ -6,12 +6,40 @@ local explorer   = require "core.explorer"
 local settings   = require "core.settings"
 local explorerlite = require "core.explorerlite"
 
+-- Add this function at the top of the file after the imports
+local function movement_spell_to_target(target)
+    local local_player = get_local_player()
+    if not local_player then return end
+
+    local movement_spell_id = {
+        288106, -- Sorcerer teleport
+        358761, -- Rogue dash
+        355606, -- Rogue shadow step
+        1663206, -- spiritborn hunter 
+        1871821, -- spiritborn soar
+        337031, -- General Evade
+    }
+
+    -- Check if the dash spell is off cooldown and ready to cast
+    for _, spell_id in ipairs(movement_spell_id) do
+        if local_player:is_spell_ready(spell_id) then
+            -- Cast the dash spell towards the target's position
+            local success = cast_spell.position(spell_id, target, 3.0)
+            if success then
+                console.print("Successfully used movement spell to unstuck target.")
+            end
+        end
+    end
+end
+
 -- Variables for stuck detection
 local last_position = nil
 local last_move_time = 0
 local stuck_threshold = 2  -- Seconds before considering player stuck
 local last_unstuck_attempt_time = 0
 local unstuck_cooldown = 3  -- Seconds between unstuck attempts
+local unstuck_attempt_timeout = 5  -- 5 seconds timeout
+local unstuck_attempt_start = 0
 
 -- Function to find and return the altar actor
 local function interact_with_altar()
@@ -65,20 +93,39 @@ local task = {
         
         -- Check if player is stuck
         if check_if_stuck() then
+            local current_time = get_time_since_inject()
+            
+            if unstuck_attempt_start == 0 then
+                unstuck_attempt_start = current_time
+            elseif current_time - unstuck_attempt_start > unstuck_attempt_timeout then
+                console.print("Unstuck attempt timed out, resetting")
+                unstuck_attempt_start = 0
+                return
+            end
+            
             console.print("Player appears to be stuck, finding unstuck target")
             local unstuck_target = explorerlite.find_unstuck_target()
             if unstuck_target then
                 console.print("Moving to unstuck target")
                 --explorerlite:clear_path_and_target()
                 explorerlite:set_custom_target(unstuck_target)
-                explorerlite:move_to_target()
+                -- Try movement spell first
+                movement_spell_to_target(unstuck_target)
+                -- Then force move as backup
+                pathfinder.force_move_raw(unstuck_target)
                 
                 -- Check if we've reached the unstuck target
                 if utils.distance_to(unstuck_target) < 1 then
                     console.print("Reached unstuck target")
                     return
+                else
+                    console.print("Distance to unstuck target: " .. utils.distance_to(unstuck_target))
                 end
+            else
+                console.print("Failed to find unstuck target")
             end
+        else
+            unstuck_attempt_start = 0
         end
 
         -- Wait for 5 seconds after boss summon before allowing interaction again

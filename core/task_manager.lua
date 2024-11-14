@@ -46,12 +46,13 @@ function task_manager.get_current_task()
 end
 
 local task_files = { 
+    "alfred",
     "ground_items_teleport", 
-    "town_salvage", 
+    --"town_salvage", 
     "interact_altar", 
     "kill_monsters", 
     "explore_boss", 
-    "interact_altar", 
+    --"interact_altar", 
     "enter_boss" 
 }
 for _, file in ipairs(task_files) do
