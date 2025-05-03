@@ -1,36 +1,8 @@
 -- Import required modules
-local utils      = require "core.utils"
-local enums      = require "data.enums"
-local tracker    = require "core.tracker"
-local explorer   = require "core.explorer"
-local settings   = require "core.settings"
+local utils = require "core.utils"
+local enums = require "data.enums"
 local explorerlite = require "core.explorerlite"
-
--- Add this function at the top of the file after the imports
-local function movement_spell_to_target(target)
-    local local_player = get_local_player()
-    if not local_player then return end
-
-    local movement_spell_id = {
-        288106, -- Sorcerer teleport
-        358761, -- Rogue dash
-        355606, -- Rogue shadow step
-        1663206, -- spiritborn hunter 
-        1871821, -- spiritborn soar
-        337031, -- General Evade
-    }
-
-    -- Check if the dash spell is off cooldown and ready to cast
-    for _, spell_id in ipairs(movement_spell_id) do
-        if local_player:is_spell_ready(spell_id) then
-            -- Cast the dash spell towards the target's position
-            local success = cast_spell.position(spell_id, target, 3.0)
-            if success then
-                console.print("Successfully used movement spell to unstuck target.")
-            end
-        end
-    end
-end
+local settings = require "core.settings"
 
 -- Variables for stuck detection
 local last_position = nil
@@ -41,19 +13,21 @@ local unstuck_cooldown = 3  -- Seconds between unstuck attempts
 local unstuck_attempt_timeout = 5  -- 5 seconds timeout
 local unstuck_attempt_start = 0
 
--- Function to find and return the altar actor
-local function interact_with_altar()
+-- Function to find and return any EGB chest actor
+local function find_egb_chest()
     local actors = actors_manager:get_all_actors()
     for _, actor in pairs(actors) do
         local name = actor:get_skin_name()
-        -- Check if the actor is one of the boss altars
-        if name == "Boss_WT4_Varshan" or name == "Boss_WT4_Duriel" or name == "Boss_WT4_PenitantKnight" or name == "Boss_WT4_Andariel" or name == "Boss_WT4_MegaDemon" or name == "Boss_WT4_S2VampireLord" or name == "Boss_WT5_Urivar" then
+        -- Check if the actor name starts with EGB_Chest
+        if name:find("EGB_Chest") == 1 then
+            console.print("Found EGB chest: " .. name)
             return actor
         end
     end
     return nil
 end
 
+-- Function to check if player is stuck
 local function check_if_stuck()
     local current_pos = get_player_position()
     local current_time = os.time()
@@ -74,17 +48,43 @@ local function check_if_stuck()
     return false
 end
 
--- Variable to track the time when the boss was last summoned
-local boss_summon_time = 0
+-- Add this function to use movement abilities to unstuck
+local function movement_spell_to_target(target)
+    local local_player = get_local_player()
+    if not local_player then return end
+
+    local movement_spell_id = {
+        288106, -- Sorcerer teleport
+        358761, -- Rogue dash
+        355606, -- Rogue shadow step
+        1663206, -- spiritborn hunter 
+        1871821, -- spiritborn soar
+        337031, -- General Evade
+    }
+
+    -- Check if the dash spell is off cooldown and ready to cast
+    for _, spell_id in ipairs(movement_spell_id) do
+        if local_player:is_spell_ready(spell_id) then
+            -- Cast the dash spell towards the target's position
+            local success = cast_spell.position(spell_id, target, 3.0)
+            if success then
+                console.print("Successfully used movement spell to target.")
+                return true
+            end
+        end
+    end
+    return false
+end
 
 -- Define the task
 local task = {
-    name = "Interact Altar",
+    name = "Open EGB Chest",
     
     -- Function to determine if the task should be executed
     shouldExecute = function()
-        local is_in_boss_zone = utils.match_player_zone("Boss_WT4_") or utils.match_player_zone("Boss_WT3_") or utils.match_player_zone("Boss_WT5_")
-        return is_in_boss_zone and interact_with_altar()
+        -- Check if any EGB chest is present
+        local chest = find_egb_chest()
+        return chest ~= nil
     end,
 
     -- Main execution function for the task
@@ -107,7 +107,6 @@ local task = {
             local unstuck_target = explorerlite.find_unstuck_target()
             if unstuck_target then
                 console.print("Moving to unstuck target")
-                --explorerlite:clear_path_and_target()
                 explorerlite:set_custom_target(unstuck_target)
                 -- Try movement spell first
                 movement_spell_to_target(unstuck_target)
@@ -128,34 +127,26 @@ local task = {
             unstuck_attempt_start = 0
         end
 
-        -- Wait for 5 seconds after boss summon before allowing interaction again
-        if boss_summon_time > 0 and current_time - boss_summon_time < 1 then
-            return
-        end
-
-        local altar = interact_with_altar()
-        if altar then
-            local actor_position = altar:get_position()
-            -- Move towards the altar if not close enough
+        -- Find any EGB chest
+        local chest = find_egb_chest()
+        if chest then
+            local actor_position = chest:get_position()
+            local chest_name = chest:get_skin_name()
+            console.print("Moving to chest: " .. chest_name)
+            
+            -- Move towards the chest if not close enough
             if utils.distance_to(actor_position) > 2 then
-                console.print("Moving to altar")
-                --explorerlite:clear_path_and_target()
                 explorerlite:set_custom_target(actor_position)
                 explorerlite:move_to_target()
             end
 
-            -- Interact with the altar when close enough
+            -- Interact with the chest when close enough
             if utils.distance_to(actor_position) <= 2 then
-                console.print("Interacting with altar")
-                interact_object(altar)
-                utility.summon_boss()
-                settings.altar_activated = true
-                boss_summon_time = current_time  -- Update the boss summon time
+                local chest_name = chest:get_skin_name()
+                console.print("Interacting with chest: " .. chest_name)
+                interact_object(chest)
             end
         end
-
-        -- Mark the task as not running
-        explorer.is_task_running = false
     end
 }
 
