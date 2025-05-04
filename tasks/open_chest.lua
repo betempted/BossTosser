@@ -13,6 +13,10 @@ local unstuck_cooldown = 3  -- Seconds between unstuck attempts
 local unstuck_attempt_timeout = 5  -- 5 seconds timeout
 local unstuck_attempt_start = 0
 
+-- Variables for chest interaction cooldown
+local last_chest_interaction_time = 0
+local chest_interaction_cooldown = 5  -- 5 seconds cooldown between chest interactions
+
 -- Function to find and return any EGB chest actor or Boss_WT_Belial_Chest
 local function find_egb_chest()
     local actors = actors_manager:get_all_actors()
@@ -140,11 +144,23 @@ local task = {
                 explorerlite:move_to_target()
             end
 
-            -- Interact with the chest when close enough
+            -- Interact with the chest when close enough and cooldown has passed
             if utils.distance_to(actor_position) <= 2 then
-                local chest_name = chest:get_skin_name()
-                console.print("Interacting with chest: " .. chest_name)
-                interact_object(chest)
+                local current_time = os.time()
+                
+                -- Check if cooldown has passed since last interaction
+                if current_time - last_chest_interaction_time >= chest_interaction_cooldown then
+                    local chest_name = chest:get_skin_name()
+                    console.print("Interacting with chest: " .. chest_name)
+                    interact_object(chest)
+                    
+                    -- Update the last interaction time
+                    last_chest_interaction_time = current_time
+                    console.print("Chest interaction cooldown started. Next interaction in " .. chest_interaction_cooldown .. " seconds.")
+                else
+                    local remaining = chest_interaction_cooldown - (current_time - last_chest_interaction_time)
+                    console.print("Chest interaction on cooldown. " .. remaining .. " seconds remaining.")
+                end
             end
         end
     end
