@@ -13,14 +13,14 @@ local unstuck_cooldown = 3  -- Seconds between unstuck attempts
 local unstuck_attempt_timeout = 5  -- 5 seconds timeout
 local unstuck_attempt_start = 0
 
--- Function to find and return any EGB chest actor
+-- Function to find and return any EGB chest actor or Boss_WT_Belial_Chest
 local function find_egb_chest()
     local actors = actors_manager:get_all_actors()
     for _, actor in pairs(actors) do
         local name = actor:get_skin_name()
-        -- Check if the actor name starts with EGB_Chest
-        if name:find("EGB_Chest") == 1 then
-            console.print("Found EGB chest: " .. name)
+        -- Check if the actor name starts with EGB_Chest or is Boss_WT_Belial_Chest
+        if name:find("EGB_Chest") == 1 or name == "Boss_WT_Belial_Chest" then
+            console.print("Found chest: " .. name)
             return actor
         end
     end
