@@ -7,15 +7,15 @@ local settings = require "core.settings"
 -- Variables for stuck detection
 local last_position = nil
 local last_move_time = 0
-local stuck_threshold = 2  -- Seconds before considering player stuck
+local stuck_threshold = 20  -- Seconds before considering player stuck
 local last_unstuck_attempt_time = 0
-local unstuck_cooldown = 3  -- Seconds between unstuck attempts
+local unstuck_cooldown = 30  -- Seconds between unstuck attempts
 local unstuck_attempt_timeout = 5  -- 5 seconds timeout
 local unstuck_attempt_start = 0
 
 -- Variables for chest interaction cooldown
 local last_chest_interaction_time = 0
-local chest_interaction_cooldown = 5  -- 5 seconds cooldown between chest interactions
+local chest_interaction_cooldown = 10  -- 5 seconds cooldown between chest interactions
 
 -- Function to find and return any EGB chest actor or Boss_WT_Belial_Chest
 local function find_egb_chest()

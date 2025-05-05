@@ -83,24 +83,19 @@ local task = {
     
     -- Function to determine if the task should be executed
     shouldExecute = function()
+        -- Get current zone silently without debug prints
         local current_zone = get_current_world():get_current_zone_name()
-        console.print("Current zone: " .. current_zone)
         
         local is_wt4 = utils.match_player_zone("Boss_WT4_")
         local is_wt3 = utils.match_player_zone("Boss_WT3_")
         local is_belial = utils.match_player_zone("Boss_Kehj_Belial")
         local is_wt5 = utils.match_player_zone("Boss_WT5_")
         
-        console.print("Zone match - WT4: " .. tostring(is_wt4) .. ", WT3: " .. tostring(is_wt3) .. ", Belial: " .. tostring(is_belial) .. ", WT5: " .. tostring(is_wt5))
-        
         local is_in_boss_zone = is_wt4 or is_wt3 or is_belial or is_wt5
-        console.print("Is in boss zone: " .. tostring(is_in_boss_zone))
         
         local altar = interact_with_altar()
-        console.print("Altar found: " .. tostring(altar ~= nil))
         
         local should_execute = is_in_boss_zone and altar ~= nil
-        console.print("Should execute interact_altar: " .. tostring(should_execute))
         
         return should_execute
     end,

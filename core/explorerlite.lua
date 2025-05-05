@@ -85,7 +85,7 @@ local max_target_distance = 120 -- Maximum distance for a new target
 local target_distance_states = {120, 40, 20, 5}
 local target_distance_index = 1
 local unstuck_target_distance = 15 -- Maximum distance for an unstuck target
-local stuck_threshold = 2      -- Seconds before the character is considered "stuck"
+local stuck_threshold = 20      -- Seconds before the character is considered "stuck"
 local last_position = nil
 local last_move_time = 0
 local last_explored_targets = {}
@@ -751,11 +751,16 @@ on_render(function()
 
     -- dont slide frames here so drawings feel smooth
     if target_position then
-        if target_position.x then
-            graphics.text_3d("TARGET_1", target_position, 20, color_red(255))
-        else
-            if target_position and target_position:get_position() then
-                graphics.text_3d("TARGET_2", target_position:get_position(), 20, color_orange(255))
+        -- Check if target_position is a vec3 object (has x property as a number, not a table)
+        if target_position.x and type(target_position.x) == "number" then
+            -- Ensure it's a proper vec3 object before passing to text_3d
+            local pos = vec3:new(target_position.x, target_position.y, target_position.z)
+            graphics.text_3d("TARGET_1", pos, 20, color_red(255))
+        elseif target_position.get_position and type(target_position.get_position) == "function" then
+            -- If it's an actor or has get_position method
+            local pos = target_position:get_position()
+            if pos then
+                graphics.text_3d("TARGET_2", pos, 20, color_orange(255))
             end
         end
     end
