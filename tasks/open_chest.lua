@@ -57,13 +57,12 @@ local function movement_spell_to_target(target)
     local local_player = get_local_player()
     if not local_player then return end
 
-    -- commented out other skills based on reports that only evade works
     local movement_spell_id = {
-        -- 288106, -- Sorcerer teleport
-        -- 358761, -- Rogue dash
-        -- 355606, -- Rogue shadow step
-        -- 1663206, -- spiritborn hunter 
-        -- 1871821, -- spiritborn soar
+        288106, -- Sorcerer teleport
+        358761, -- Rogue dash
+        355606, -- Rogue shadow step
+        1663206, -- spiritborn hunter 
+        1871821, -- spiritborn soar
         337031, -- General Evade
     }
 
