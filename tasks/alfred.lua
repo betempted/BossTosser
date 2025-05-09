@@ -26,7 +26,8 @@ function task.shouldExecute()
         if (status.enabled and status.inventory_full and
             (status.sell_count > 0 or status.salvage_count > 0)) or
             (status.enabled and status.restock_count > 0) or
-            (status.enabled and status.teleport)
+            (status.enabled and status.teleport) or
+            (status.enabled and status.need_repair)
         then
             return true
         elseif task.status == status_enum['WAITING'] then
