@@ -46,7 +46,7 @@ function task_manager.get_current_task()
 end
 
 local task_files = { 
-    
+    "cheat_death",
     "alfred",
     "ground_items_teleport", 
     --"town_salvage", 

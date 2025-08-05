@@ -10,7 +10,9 @@ local settings = {
     ga_threshold = 1,
     uber_ga_threshold = 1,
     use_alfred = true,
-    enable_ground_items_teleport = true
+    enable_ground_items_teleport = true,
+    cheat_death = false,
+    escape_percentage = 40
 }
 
 function settings:update_settings()
@@ -19,6 +21,8 @@ function settings:update_settings()
     settings.ga_threshold = gui.elements.ga_slider:get()
     settings.uber_ga_threshold = gui.elements.uber_ga_slider:get()
     settings.enable_ground_items_teleport = gui.elements.enable_ground_items_teleport:get()
+    settings.cheat_death = gui.elements.cheat_death:get()
+    settings.escape_percentage = gui.elements.escape_percentage:get()
 end
 
 return settings
