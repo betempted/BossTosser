@@ -1,5 +1,5 @@
 local gui = {}
-local plugin_label = "Bosser (HC)"
+local plugin_label = "Bosser"
 
 local function create_checkbox(value, key)
     return checkbox:new(value, get_hash(plugin_label .. '_' .. key))
@@ -28,7 +28,8 @@ gui.elements = {
     uber_ga_slider = slider_int:new(1, 4, 1, get_hash(plugin_label .. "_uber_ga_slider")),
     use_alfred = create_checkbox(false, "use_alfred"),
     enable_ground_items_teleport = create_checkbox(true, "enable_ground_items_teleport"),
-    cheat_death = create_checkbox("cheat_death")
+    cheat_death = create_checkbox(true, "cheat_death"),
+    escape_percentage = slider_int:new(10, 100, 40, get_hash("escape_percentage"))
 }
 
 function gui.render()
@@ -41,16 +42,17 @@ function gui.render()
         gui.elements.ga_slider:render("Min Unique GA Counter", "Select minimum Greater Affix to keep?")
         gui.elements.uber_ga_slider:render("Min Uber GA Counter", "Select minimum Greater Affix to keep")
         gui.elements.enable_ground_items_teleport:render("Enable Ground Items Teleport", "Enable teleporting to town when too many items are on ground")
-        gui.elements.cheat_death:render("Enable Hardcore cheat death", "Enable Hardcore cheat death")
-        if gui.elements.cheat_death:get() then
-            gui.elements.escape_percentage:render("Health %%", "%% health to immediately leave pit")
-        end
         
         if PLUGIN_alfred_the_butler then
             local alfred_status = PLUGIN_alfred_the_butler.get_status()
             if alfred_status.enabled then
                 gui.elements.use_alfred:render("Use alfred", "use alfred to manage town tasks")
             end
+        end
+        
+        gui.elements.cheat_death:render("Enable Hardcore cheat death", "Enable Hardcore cheat death")
+        if gui.elements.cheat_death:get() then
+            gui.elements.escape_percentage:render("Health %%", "%% health to immediately leave pit")
         end
         
         gui.elements.settings_tree:pop()
